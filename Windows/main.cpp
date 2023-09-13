@@ -1,20 +1,69 @@
+// HUNT3R_LISTENER
+//
+//------------------------------------------------------------------------------------------INCLUDES
 #include <iostream>
 #include <WinSock2.h>
 #include <ws2tcpip.h>
 #include <string>
+#include <thread>
+#include <mutex>
 
 #pragma comment(lib, "ws2_32.lib")
 
-void xStartListener(int port) {
+
+//------------------------------------------------------------------------------------------MUTEX -> mtx
+std::mutex mtx; // Mutex -> Sync Output 
+
+
+//------------------------------------------------------------------------------------------HANDLE CLIENT SHELL SESSION FUNCTION
+void xHandleClient(SOCKET clientSocket) {
+    char yBuffer[1024];
+    int yBytesRead;
+
+    while (true) {
+        yBytesRead = recv(clientSocket, yBuffer, sizeof(yBuffer), 0);
+        if (yBytesRead <= 0) {
+            std::cerr << "Connection Closed or Error." << std::endl;
+            closesocket(clientSocket);
+            return;
+        }
+
+        std::string yCommand(yBuffer, yBytesRead); // Received Data -> Output
+        {
+            std::lock_guard<std::mutex> lock(mtx);
+            std::cout << "Received Output: " << yCommand;
+        }
+    }
+}
+
+
+//------------------------------------------------------------------------------------------INPUT FUNCTION
+void xInputThread(SOCKET clientSocket) {
+    while (true) {
+        std::string yUserInput;
+        std::cout << "Enter a Command: ";
+        std::getline(std::cin, yUserInput);
+
+        send(clientSocket, yUserInput.c_str(), yUserInput.length(), 0); // Send -> Client
+
+        if (yUserInput == "exit") {
+            break; // exit -> End Input Loop
+        }
+    }
+}
+
+
+//------------------------------------------------------------------------------------------LISTENER STARTUP FUNCTION
+void xStartListener(int yPort) {
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
-        std::cerr << "WSAStartup failed!" << std::endl;
+        std::cerr << "WSAStartup Failed!" << std::endl;
         return;
     }
 
     SOCKET listener = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (listener == INVALID_SOCKET) {
-        std::cerr << "Socket creation failed!" << std::endl;
+        std::cerr << "Socket Creation Failed!" << std::endl;
         WSACleanup();
         return;
     }
@@ -22,23 +71,23 @@ void xStartListener(int port) {
     sockaddr_in serverAddr;
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_addr.s_addr = INADDR_ANY;
-    serverAddr.sin_port = htons(port);
+    serverAddr.sin_port = htons(yPort);
 
     if (bind(listener, reinterpret_cast<SOCKADDR*>(&serverAddr), sizeof(serverAddr)) == SOCKET_ERROR) {
-        std::cerr << "Bind failed!" << std::endl;
+        std::cerr << "Bind Failed!" << std::endl;
         closesocket(listener);
         WSACleanup();
         return;
     }
 
     if (listen(listener, SOMAXCONN) == SOCKET_ERROR) {
-        std::cerr << "Listen failed!" << std::endl;
+        std::cerr << "Listen Failed!" << std::endl;
         closesocket(listener);
         WSACleanup();
         return;
     }
 
-    std::cout << "Listening for incoming connections on port " << port << "..." << std::endl;
+    std::cout << "Listening for Incoming Connections on Port " << yPort << "..." << std::endl;
 
     while (true) {
         SOCKET clientSocket = accept(listener, NULL, NULL);
@@ -49,47 +98,19 @@ void xStartListener(int port) {
             return;
         }
 
-        std::cout << "Received an incoming connection!" << std::endl;
+        std::cout << "Received an Incoming Connection!" << std::endl;
 
-        char buffer[1024];
-        int bytesRead;
-
-        // Separate Schleife für die Eingabe vom Benutzer
-        while (true) {
-            std::string userInput;
-            std::cout << "Enter a command: ";
-            std::getline(std::cin, userInput);
-
-            // Befehl an den Client senden
-            send(clientSocket, userInput.c_str(), userInput.length(), 0);
-
-            if (userInput == "exit") {
-                break; // Beende die Eingabeschleife, wenn der Benutzer "exit" eingibt
-            }
-        }
-
-        // Schleife zum Empfangen der Ausgabe vom Client
-        while (true) {
-            bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
-            if (bytesRead <= 0) {
-                std::cerr << "Connection closed or error." << std::endl;
-                closesocket(clientSocket);
-                break;
-            }
-
-            // Ausgabe der empfangenen Daten
-            std::string command(buffer, bytesRead);
-            std::cout << "Received output: " << command;
-        }
-
-        closesocket(clientSocket);
+        std::thread(xHandleClient, clientSocket).detach(); // Start Thread -> Handle Client Shell
+        std::thread(xInputThread, clientSocket).detach(); // Start Thread -> Shell Input
     }
 
     closesocket(listener);
     WSACleanup();
 }
 
+
+//------------------------------------------------------------------------------------------MAIN FUNCTION
 int main() {
-    xStartListener(8080); // Rufe die Listener-Funktion mit dem gewünschten Port auf
+    xStartListener(8080); // Call -> xStartListener Function
     return 0;
 }

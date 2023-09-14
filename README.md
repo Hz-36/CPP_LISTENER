@@ -1,4 +1,4 @@
-# C++ Windows TCP Listener
+# Windows TCP Listener C++
 This C++ listener program allows you to create a shell session over a network connection and interact with a remote client. The program was developed using the following libraries:
 
 - **WinSock2:** This Windows-specific library is used for network communication. It allows for the creation of socket connections and data exchange over these connections.

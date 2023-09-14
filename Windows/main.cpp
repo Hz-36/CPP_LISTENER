@@ -18,6 +18,21 @@ std::mutex mtx; // Mutex -> Sync Output
 std::string xClientID = "XCLIENT00001";
 
 
+//------------------------------------------------------------------------------------------ASCII STARTUP
+void xPrintAsciiArtBanner() {
+    std::cout << "@@@  @@@  @@@@@@@@             @@@@@@     @@@@@@  \n"
+        "@@@  @@@  @@@@@@@@             @@@@@@@   @@@@@@@  \n"
+        "@@!  @@@       @@!                 @@@  !@@       \n"
+        "!@!  @!@      !@!                  @!@  !@!       \n"
+        "@!@!@!@!     @!!    @!@!@!@!@  @!@!!@   !!@@!@!   \n"
+        "!!!@!!!!    !!!     !!!@!@!!!  !!@!@!   @!!@!!!!  \n"
+        "!!:  !!!   !!:                     !!:  !:!  !:!  \n"
+        ":!:  !:!  :!:                      :!:  :!:  !:!  \n"
+        "::   :::   :: ::::             :: ::::  :::: :::  \n"
+        " :   : :  : :: : :              : : :    :: : :   \n" << std::endl << std::endl;
+}
+
+
 //------------------------------------------------------------------------------------------HANDLE CLIENT SHELL SESSION FUNCTION
 void xHandleClient(SOCKET clientSocket) {
     char yBuffer[1024];
@@ -125,6 +140,7 @@ void xStartListener(int yPort) {
 //------------------------------------------------------------------------------------------MAIN FUNCTION
 int main() {
     SetConsoleOutputCP(CP_UTF8);
+    xPrintAsciiArtBanner();
     xStartListener(8080); // Call -> xStartListener Function
     return 0;
 }

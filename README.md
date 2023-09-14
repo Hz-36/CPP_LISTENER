@@ -17,29 +17,29 @@ The program works by creating a listener socket and waiting for incoming connect
 
 # Instructions
 To run the program, follow these steps:
-   1. Clone this repository to your local computer:
+1. Clone this repository to your local computer:
 
 ```bash
-  git clone https://github.com/YourUsername/YourRepository.git
+  git clone https://github.com/Hz-36/CPP_LISTENER.git
 ```
 
-   3. Compile the program using a C++ compiler that supports the required libraries. For example:
+3. Compile the program using a C++ compiler that supports the required libraries. For example:
 
 ```bash
-  g++ -o listenerProgram listenerProgram.cpp -lws2_32
+  g++ -o Hz36Listener main.cpp -lws2_32
 ```
 
-   4. Make sure to add the -lws2_32 flag to link the WinSock2 library.
+4. Make sure to add the -lws2_32 flag to link the WinSock2 library.
 
-   3. Execute the compiled program:
+3. Execute the compiled program:
 
 ```bash
-  ./listenerProgram
+  ./Hz36Listener
 ```
 
-   4. The program will listen for incoming connections on port 8080 by default. You can change the port number in the xStartListener function if desired.
+4. The program will listen for incoming connections on port 8080 by default. You can change the port number in the xStartListener function if desired.
 
-   5. You can enter commands and view the output in the console window. The output can also be sent to a web server via AJAX requests if you've added that functionality.
+5. You can enter commands and view the output in the console window. The output can also be sent to a web server via AJAX requests if you've added that functionality.
 
 Please note that this program has been tested only on Windows and uses specific Windows libraries. If you intend to use it on other operating systems, modifications to the code may be necessary.
 

@@ -19,23 +19,23 @@ The program works by creating a listener socket and waiting for incoming connect
 To run the program, follow these steps:
    1. Clone this repository to your local computer:
 
-```bash
-  git clone https://github.com/YourUsername/YourRepository.git
- ```
+    ```bash
+      git clone https://github.com/YourUsername/YourRepository.git
+     ```
 
    3. Compile the program using a C++ compiler that supports the required libraries. For example:
 
-```bash
-  g++ -o listenerProgram listenerProgram.cpp -lws2_32
-```
+    ```bash
+      g++ -o listenerProgram listenerProgram.cpp -lws2_32
+    ```
 
    4. Make sure to add the -lws2_32 flag to link the WinSock2 library.
 
    3. Execute the compiled program:
 
-```bash
-  ./listenerProgram
-```
+    ```bash
+      ./listenerProgram
+    ```
 
    4. The program will listen for incoming connections on port 8080 by default. You can change the port number in the xStartListener function if desired.
 

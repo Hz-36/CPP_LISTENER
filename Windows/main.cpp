@@ -2,9 +2,11 @@
 //
 //------------------------------------------------------------------------------------------INCLUDES
 #include <iostream>
+#include <cstdlib>
 #include <WinSock2.h>
 #include <ws2tcpip.h>
 #include <string>
+#include <map>
 #include <thread>
 #include <chrono>
 #include <mutex>
@@ -89,9 +91,34 @@ void xInputThread(SOCKET clientSocket) {
             std::cout << "Usage: [File , Destination] file_i_want_to_upload.txt , C:/Destination/Path" << std::endl;
         } 
         
-        else if (yUserInput == "xcolor ") { // Change Colors
-            std::cout << "CHANGE COLORS" << std::endl;
-            std::cout << "Usage: [Font Color , Background Color] green , black" << std::endl;
+        else if (yUserInput.substr(0, 7) == "xcolor ") { // Change Colors
+            std::string yUserInput = yUserInput.substr(7); // Extract Font Color and Background Color from User Input
+            std::istringstream zIss(yUserInput);
+            std::string yFontColor, yBackgroundColor;
+            zIss >> yFontColor >> yBackgroundColor;
+
+            std::map<std::string, int> yColorMap = { // Map Input Color Choices to Corresponding Console Color Codes
+                {"black", 0}, {"blue", 1}, {"green", 2}, {"aqua", 3},
+                {"red", 4}, {"purple", 5}, {"yellow", 6}, {"white", 7},
+                {"gray", 8}, {"light_blue", 9}, {"light_green", 10},
+                {"light_aqua", 11}, {"light_red", 12}, {"light_purple", 13},
+                {"light_yellow", 14}, {"bright_white", 15}
+            };
+
+            auto yFontColorCode = yColorMap.find(yFontColor);
+            auto yBackgroundColorCode = yColorMap.find(yBackgroundColor);
+
+            if (yFontColorCode != yColorMap.end() && yBackgroundColorCode != yColorMap.end()) { // Check for Valid Colors
+                int yFinalColor = yFontColorCode->second + yBackgroundColorCode->second * 16;
+
+                HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE); // Change Console Color
+                SetConsoleTextAttribute(hConsole, yFinalColor);
+
+                std::cout << "Font Color Set to: " << yFontColor << ", Background Color Set to: " << yBackgroundColor << std::endl;
+            }
+            else {
+                std::cout << "Invalid Color Choice. Please Choose from the Available Colors." << std::endl;
+            }
         }
     }
 }
@@ -142,7 +169,7 @@ void xStartListener(int yPort) {
     while (true) { // True -> Incoming Connection -> Accept
         SOCKET clientSocket = accept(listener, NULL, NULL);
         if (clientSocket == INVALID_SOCKET) {
-            std::cerr << "Accept failed!" << std::endl;
+            std::cerr << "Accept Failed!" << std::endl;
             closesocket(listener);
             WSACleanup();
             return;
@@ -166,4 +193,3 @@ int main() {
     xStartListener(8080); // Call -> xStartListener Function
     return 0;
 }
-

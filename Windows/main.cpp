@@ -1,4 +1,4 @@
-// HUNT3R_LISTENER
+// Windows TCP Listener C++ By Hz-36
 //
 //------------------------------------------------------------------------------------------INCLUDES
 #include <iostream>
@@ -38,7 +38,7 @@ void PrintAsciiArtBanner() {
 
 //------------------------------------------------------------------------------------------HANDLE CLIENT SHELL SESSION FUNCTION
 void xHandleClient(SOCKET clientSocket) {
-    char yBuffer[1024];
+    char yBuffer[1024]; // Buffer Size
     int yBytesRead;
 
     while (true) {
@@ -125,8 +125,8 @@ void xInputThread(SOCKET clientSocket) {
 
 
 //------------------------------------------------------------------------------------------AJAX INPUT FUNCTION
-void xAjaxInput(SOCKET clientSocket, const std::string& command) {
-    send(clientSocket, command.c_str(), command.length(), 0); // Command -> Client
+void xAjaxInput(SOCKET clientSocket, const std::string& yCommand) {
+    send(clientSocket, yCommand.c_str(), yCommand.length(), 0); // Command -> Client
 }
 
 

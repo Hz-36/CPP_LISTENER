@@ -8,6 +8,7 @@
 #include <ws2tcpip.h>
 #include <string>
 #include <map>
+#include <unordered_map>
 #include <thread>
 #include <chrono>
 #include <mutex>
@@ -34,6 +35,30 @@ void PrintAsciiArtBanner() {
         ":!:  !:!  :!:                      :!:  :!:  !:!  \n"
         "::   :::   :: ::::             :: ::::  :::: :::  \n"
         " :   : :  : :: : :              : : :    :: : :   \n" << std::endl;
+}
+
+
+//------------------------------------------------------------------------------------------VALIDATE AND SET ENCRYPTION
+int yGlobalEncryption = 0;
+void xValidateAndSetEncryption(const std::string& yEncryptionMethod) {
+    std::unordered_map<std::string, int> yEncryptionMap = { // Define a Map Associating Encryption Methods with their Corresponding Numbers
+        {"aes", 1},
+        {"xor", 2},
+        {"bin", 3},
+        {"md5", 4},
+        {"pgp", 5}
+    };
+
+    auto it = yEncryptionMap.find(yEncryptionMethod);
+
+    if (it != yEncryptionMap.end()) { // Validate Encryption Method
+        yGlobalEncryption = it->second;
+    }
+
+    else {
+        std::cout << "[!] NO ENCRYPTION SET [!]\n";
+        yGlobalEncryption = 0;  // 0 -> No Encryption
+    }
 }
 
 
@@ -205,6 +230,7 @@ int main() {
 
     std::cout << "Encryption Method: ";
     std::cin >> yEncryptionMethod;
+    xValidateAndSetEncryption(yEncryptionMethod); 
     std::cout << "-------------------------------------------------" << std::endl;
     std::cout << std::endl;
     //system("cls");

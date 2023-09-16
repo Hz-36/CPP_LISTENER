@@ -1,4 +1,5 @@
-// Windows TCP Listener C++ By Hz-36
+// Windows TCP Listener C++
+// By Hz-36
 //
 //------------------------------------------------------------------------------------------INCLUDES
 #include <iostream>
@@ -32,13 +33,13 @@ void PrintAsciiArtBanner() {
         "!!:  !!!   !!:                     !!:  !:!  !:!  \n"
         ":!:  !:!  :!:                      :!:  :!:  !:!  \n"
         "::   :::   :: ::::             :: ::::  :::: :::  \n"
-        " :   : :  : :: : :              : : :    :: : :   \n" << std::endl << std::endl;
+        " :   : :  : :: : :              : : :    :: : :   \n" << std::endl;
 }
 
 
 //------------------------------------------------------------------------------------------HANDLE CLIENT SHELL SESSION FUNCTION
 void xHandleClient(SOCKET clientSocket) {
-    char yBuffer[1024]; // Buffer Size
+    char yBuffer[1024];
     int yBytesRead;
 
     while (true) {
@@ -67,7 +68,7 @@ void xInputThread(SOCKET clientSocket) {
 
         // Sleep Function is used to prevent against double print Bug (Local Network => 100, Internet => 150 / 175 / 200)
         // Sleep Function can be deleted if -> [std::cout << "Enter a...] is deleted too or commented out
-        Sleep(150); // Windows
+        Sleep(200); // Windows
         //usleep(150); // Linux -> #include <unistd.h>
 
         std::cout << "Enter a Command: ";
@@ -175,6 +176,8 @@ void xStartListener(int yPort) {
             return;
         }
 
+        system("cls"); // Clear Console
+
         std::cout << "Received an Incoming Connection!" << std::endl;
 
         std::thread(xHandleClient, clientSocket).detach(); // Start Thread -> Handle Client Shell
@@ -190,6 +193,23 @@ void xStartListener(int yPort) {
 int main() {
     SetConsoleOutputCP(CP_UTF8); // Set Console Output -> UTF8
     PrintAsciiArtBanner(); // Print Ascii Banner
-    xStartListener(8080); // Call -> xStartListener Function
+    
+    //------------------------------------------------------------------------------------------>STARTUP MENU
+    std::string yEncryptionMethod = ""; // User Input -> Encryption Method AES / PGP / XOR / BIN
+    int yPort = 0; // User Input -> Listener Port
+
+    std::cout << "-------------------------------------------------" << std::endl;
+    std::cout << "Port: ";
+    std::cin >> yPort;
+    //std::cout << std::endl;
+
+    std::cout << "Encryption Method: ";
+    std::cin >> yEncryptionMethod;
+    std::cout << "-------------------------------------------------" << std::endl;
+    std::cout << std::endl;
+    //system("cls");
+
+    //------------------------------------------------------------------------------------------>START LISTENER
+    xStartListener(yPort); // Call -> xStartListener Function
     return 0;
 }

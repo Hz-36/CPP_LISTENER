@@ -13,8 +13,8 @@
 #include <chrono>
 #include <mutex>
 #include <Windows.h>
-//#include <openssl/aes.h> // AES 
-#include <bitset> // BIN
+//#include <openssl/aes.h>
+#include <bitset>
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -46,9 +46,7 @@ void xValidateAndSetEncryption(const std::string& yEncryptionMethod) {
     std::unordered_map<std::string, int> yEncryptionMap = { // Define a Map Associating Encryption Methods with their Corresponding Numbers
         {"aes", 1},
         {"xor", 2},
-        {"bin", 3},
-        {"md5", 4},
-        {"pgp", 5}
+        {"bin", 3}
     };
 
     auto it = yEncryptionMap.find(yEncryptionMethod);
@@ -149,14 +147,6 @@ void xHandleClient(SOCKET clientSocket) {
             else if (yGlobalEncryption == 3) {
                 std::string yDecryptedText = xDecryptBinary(yCommand);
                 std::cout << std::endl << yDecryptedText << std::endl;
-            }
-
-            else if (yGlobalEncryption == 4) {
-                // Decrypt using MD5
-            }
-
-            else if (yGlobalEncryption == 5) {
-                // Decrypt using PGP
             }
 
             else if (yGlobalEncryption == 0) {

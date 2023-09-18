@@ -13,8 +13,8 @@
 #include <chrono>
 #include <mutex>
 #include <Windows.h>
-//#include <openssl/aes.h>
-#include <bitset>
+#include <openssl/aes.h> // AES
+#include <bitset> // BIN
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -106,13 +106,6 @@ std::string xDecryptBinary(const std::string& yEncryptedText) {
 
     return yDecryptedText;
 }
-
-
-//------------------------------------------------------------------------------------------MD5 DECRYPTION 
-
-
-//------------------------------------------------------------------------------------------PGP DECRYPTION 
-
 
 
 //------------------------------------------------------------------------------------------HANDLE CLIENT SHELL SESSION FUNCTION

@@ -301,7 +301,6 @@ int main() {
     xValidateAndSetEncryption(yEncryptionMethod); 
     std::cout << "-------------------------------------------------" << std::endl;
     std::cout << std::endl;
-    //system("cls");
 
     //------------------------------------------------------------------------------------------>START LISTENER
     xStartListener(yPort); // Call -> xStartListener Function

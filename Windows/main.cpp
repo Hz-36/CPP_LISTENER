@@ -9,9 +9,9 @@
 #include <string>
 #include <map>
 #include <unordered_map>
-#include <thread>
-#include <chrono>
-#include <mutex>
+#include <thread> // Thread Management
+#include <chrono> // Time Management
+#include <mutex> 
 #include <Windows.h>
 #include <openssl/aes.h> // AES
 #include <bitset> // BIN

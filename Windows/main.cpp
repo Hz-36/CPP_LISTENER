@@ -63,7 +63,6 @@ void xValidateAndSetEncryption(const std::string& yEncryptionMethod) {
 
 
 //------------------------------------------------------------------------------------------AES DECRYPTION 
-/*
 std::string xDecryptAES(const std::string& yCiphertext, const std::string& yKey, const std::string& iv) {
     AES_KEY decryptKey;
     AES_set_decrypt_key(reinterpret_cast<const unsigned char*>(yKey.c_str()), 128, &decryptKey);
@@ -76,7 +75,7 @@ std::string xDecryptAES(const std::string& yCiphertext, const std::string& yKey,
         &decryptKey);
 
     return yDecryptedText;
-} */
+}
 
 
 //------------------------------------------------------------------------------------------XOR DECRYPTION 

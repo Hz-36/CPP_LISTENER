@@ -21,9 +21,6 @@
 //------------------------------------------------------------------------------------------MUTEX -> mtx
 std::mutex mtx; // Mutex -> Sync Output 
 
-//std::string xClientID = "XCLIENT00001"; // XID = HUNT3R C2 SYNC
-
-
 
 //------------------------------------------------------------------------------------------ASCII STARTUP
 void PrintAsciiArtBanner() {

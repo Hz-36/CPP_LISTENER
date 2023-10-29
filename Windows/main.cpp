@@ -13,7 +13,6 @@
 #include <chrono> 
 #include <mutex> // Sync Output
 #include <Windows.h> // Win
-//#include <openssl/aes.h> // AES
 #include <bitset>
 
 #pragma comment(lib, "ws2_32.lib")

